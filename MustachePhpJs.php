@@ -28,6 +28,11 @@ class MustachePhpJs
     private $template;
 
     /**
+     * @var array
+     */
+    private $partials = array();
+
+    /**
      * Singleton.
      *
      * @return PerfectExcerpt
@@ -86,45 +91,112 @@ class MustachePhpJs
     }
 
     /**
+     * Set the template directly.
+     *
+     * @param string $tmplPath
+     */
+    public function setTmpl($tmplPath)
+    {
+        if (file_exists($tmplPath)) {
+            $this->template = file_get_contents($tmplPath);
+        }
+    }
+
+    /**
      * Get template wrapped in script tags for mustache.js.
      */
-    public function getScript()
+    public function getScript($templateName = '', $template = '', $class = 'mustacheTmpl')
     {
-        echo '<script id="' . $this->templateName . '" type="x-tmpl-mustache">';
-        echo $this->template;
+        // If not passed as parameters
+        if (!$templateName || !$template) {
+            $templateName = $this->templateName;
+            $template = $this->template;
+        }
+        echo '<script id="' . $templateName . '" class="' . $class . '" type="x-tmpl-mustache">';
+        echo $template;
         echo '</script>';
     }
 
     /**
+     * Get scripts for both main template and partials.
+     */
+    public function getScripts()
+    {
+        // Main template script
+        $this->getScript();
+
+        // Add partial scripts
+        foreach ($this->partials as $partialName => $partial) {
+            $this->getScript($partialName, $partial, 'partialTmpl');
+        }
+    }
+
+    /**
      * Stop output buffer and render template.
+     *
+     * @param string templateName
+     * @param array $templateData
      */
     public function render($templateName, $templateData)
     {
         $this->templateName = $templateName;
 
-        // Get template and clean output buffer
-        $this->template = ob_get_clean();
+        // Capture partial
+        // Template might have been set directly making this step unnecessary
+        if ($this->capturing == true) {
+            // Get template and clean output buffer
+            $this->template = ob_get_clean();
 
-        // Disable lock and enable rendering of another template
-        $this->capturing = false;
+            // Disable lock and enable rendering of another template
+            $this->capturing = false;
+        }
 
         echo $this->engine->render($this->template, $templateData);
     }
 
     /**
-     * Stop output buffer and save partial
+     * Render template from file.
+     *
+     * @param string $templateFile
+     * @param array $templateData
      */
-    public function setPartial($templateName)
+    public function renderFile($templateFile, $templateData)
+    {
+        if (file_exists($templateFile)) {
+            // Load template from file
+            $this->template = file_get_contents($templateFile);
+
+            echo $this->engine->render($this->template, $templateData);
+        }
+    }
+
+    /**
+     * Stop output buffer and save partial
+     *
+     * @param string $templateName
+     */
+    public function setPartial($templateName, $template = null)
     {
         $this->templateName = $templateName;
-        $this->template = ob_get_clean();
-        $partial[$templateName] = $this->template;
 
-        // Disable lock and enable rendering of another template
-        $this->capturing = false;
+        // Capture partial
+        if ($this->capturing == true) {
+            $this->template = ob_get_clean();
+            $this->partials[$templateName] = $this->template;
 
-        // Set partials in mustache engine
-        $this->engine->setPartials($partial);
+            // Disable lock and enable rendering of another template
+            $this->capturing = false;
+        }
+
+        // Set partial directly
+        else if ($template != null) {
+            $this->partials[$templateName] = $template;
+        }
+
+        if (!empty($this->partials)) {
+            // Set partials in mustache engine
+            $this->engine->setPartials($this->partials);
+        }
 
         // For chaining
         return $this;

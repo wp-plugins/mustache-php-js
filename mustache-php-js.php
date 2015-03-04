@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Mustache Php Js
- * Version: 0.0.1
+ * Version: 1
  * Plugin URI: http://davidajnered.com
  * Description: Easy sharing of mustache templates between php and js for logic-less templates.
  * Author: David Ajnered

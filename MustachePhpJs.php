@@ -155,22 +155,6 @@ class MustachePhpJs
     }
 
     /**
-     * Render template from file.
-     *
-     * @param string $templateFile
-     * @param array $templateData
-     */
-    public function renderFile($templateFile, $templateData)
-    {
-        if (file_exists($templateFile)) {
-            // Load template from file
-            $this->template = file_get_contents($templateFile);
-
-            echo $this->engine->render($this->template, $templateData);
-        }
-    }
-
-    /**
      * Stop output buffer and save partial
      *
      * @param string $templateName

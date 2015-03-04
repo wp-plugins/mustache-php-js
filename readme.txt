@@ -42,7 +42,7 @@ This is an example of how it can look in your html template file.
 `
 You can call the mustache() function as soon as the plugin is active. This will return the mustache object for you. Call the **capture()** function at the top of the code that you want to be a part of your template. This will start the PHP output buffer and save all code within your template to a string. At the end of your template you call **render()**. This will stop the output buffer as well as output the template with the passed template data.
 
-If you need to load template file that's also possible by using the **renderFile($templateFile, $templateData)** method.
+If you need to load template file that's also possible by using the **setTmpl($templateFile)** method and then juse render as normal.
 
 You probably want to get your template data from a function if your going to use mustache.js since you will be loading your data with ajax. If you're not going to use mustache.js there's not much more to it.
 `
